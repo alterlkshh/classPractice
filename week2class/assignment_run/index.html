@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo Website</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display:flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    #todoApp {
+      /* max-width: 500px;
+      margin: 50px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      display:flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column; */
+      max-width: 30%;
+      margin: 85px auto;
+      padding: 45px;
+      border: 7px solid #ccc;
+      border-radius: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+}
+    
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    div {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 10px;
+      width: 70%;
+    }
+
+    input[type="text"] {
+      
+      padding: 12px;
+      margin: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 90%;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 20% ;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    div mainArea {
+      display: flex;
+      flex-direction: row;
+    }
+  </style>
+</head>
+
+<script>
+
+  // function deletedone(id){
+  //   console.log("todo deleted : ", id)
+  //   // delete the right todo from the list 
+  //   // you will need to give each todo an id, and that should be enough to remove it
+
+  //   // finds todoelement with the given id 
+  //   var todoelement = document.getElementById("todo" + id);
+  //   if (todoElement) {
+  //   // Remove the todo element from its parent (the mainArea div)
+  //   const mainArea = document.getElementById("mainArea");
+  //   mainArea.removeChild(todoElement);
+  //   }
+  // }
+
+  function deletedone(id) {
+  console.log("Todo deleted:", id);
+
+  // Find the todo element using the provided ID
+  const todoElement = document.getElementById("todo" + id);
+
+  if (todoElement) {
+    // Remove the todo element from its parent (the mainArea div)
+    var parentElement = document.getElementById("mainArea")
+    parentElement.removeChild(todoElement);
+  }
+}
+
+
+
+  function deleteTodo(id){
+    console.log(id);
+    fetch("http://localhost:3002/todos/" + id, {
+          method: "DELETE",
+          headers: {
+              "Content-Type" : "application/json"
+          }
+      }).then(deletedone(id))
+  }
+
+  function todoscallback(data){
+    // console.log(data)
+    var parentElement = document.getElementById("mainArea")
+    // parentElement.innerHTML = JSON.stringify(data)
+    for(var i = 0;i<data.length;i++){
+      var childElement = document.createElement("div")
+
+      var grandchileElement1 = document.createElement("span")
+      grandchileElement1.innerHTML = data[i].title;
+
+      var grandchileElement2 = document.createElement("span")
+      grandchileElement2.innerHTML = data[i].description;
+
+      var grandchileElement3 = document.createElement("button")
+      grandchileElement3.innerHTML = "delete";
+      grandchileElement3.setAttribute("onclick","deleteTodo(" + data[i].id + ")")
+
+      childElement.appendChild(grandchileElement1)
+      childElement.appendChild(grandchileElement2)
+      childElement.appendChild(grandchileElement3)
+
+      parentElement.appendChild(childElement)
+
+    }
+  }
+
+  function callback2(resp){
+    resp.json().then(todoscallback)
+  }
+
+  function getData(){
+      fetch("http://localhost:3002/todos", {
+          method: "GET"
+      }).then(callback2)
+  }
+
+  getData();
+
+
+  function parsedResponse(data){
+      console.log(data);
+      var parentElement = document.getElementById("mainArea")
+      var childElement = document.createElement("div")
+
+      var grandchileElement1 = document.createElement("span")
+      grandchileElement1.innerHTML = data.title;
+
+      var grandchileElement2 = document.createElement("span")
+      grandchileElement2.innerHTML = data.description;
+
+      var grandchileElement3 = document.createElement("button")
+      grandchileElement3.innerHTML = "delete";
+
+      childElement.appendChild(grandchileElement1)
+      childElement.appendChild(grandchileElement2)
+      childElement.appendChild(grandchileElement3)
+
+      parentElement.appendChild(childElement)
+  } 
+
+  function callback(resp){
+      resp.json().then(parsedResponse)
+  }
+
+  function onPress(){
+    var title = document.getElementById("todoTitleInput").value;
+    var description = document.getElementById("todoDescriptionInput").value;
+    
+      fetch("http://localhost:3002/todos", {
+          method: "POST",
+          body: JSON.stringify({
+              "title" : title,
+              "description" : description
+          }),
+          headers: {
+              "Content-Type" : "application/json"
+          }
+      }).then(callback)
+  }
+</script>
+
+<body>
+  <div id="todoApp">
+    <h1>Todo List</h1>
+    <div>
+      <input type="text" id="todoTitleInput" placeholder="Title">
+      <input type="text" id="todoDescriptionInput" placeholder="Description">
+      
+    </div>
+    <button id="Send todo " onclick="onPress()">Submit</button>
+    <ul id="todoList">
+      <!-- Todo items will be added here dynamically using JavaScript -->
+    </ul>
+  </div>
+
+  <div id="mainArea">
+    
+  </div>
+  
+</body>
+
+
+
+</html>
